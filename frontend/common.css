@@ -1,0 +1,15 @@
+/* Small usability improvements; retain the original cards, colours and frame. */
+:focus-visible { outline: 2px solid #2563eb !important; outline-offset: 3px; }
+button, a, select { -webkit-tap-highlight-color: transparent; }
+button:disabled, select:disabled, input:disabled { opacity: .55; cursor: wait; }
+main { min-height: 0; overflow-wrap: anywhere; }
+#progress-feedback { min-width: 0; }
+#status-feedback:empty, #load-error:empty { display: none; }
+#overview-owner, #overview-priority-name { max-width: 65%; text-align: right; }
+body > .app-frame { height: 100dvh; min-height: 0; }
+@media (min-width: 640px) {
+  body > .app-frame { height: min(820px, calc(100dvh - 2rem)); min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

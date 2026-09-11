@@ -38,7 +38,23 @@ class AppRegressionTest(unittest.TestCase):
             self.assertEqual(client.post(action_url, json=payload | {"owner": " "}).status_code, 422)
             action = post(action_url, payload)
             detail_url = f"/api/actions/{action['id']}"
+            self.assertEqual(client.patch(detail_url + "/progress", json={"progress": 25}).status_code, 200)
+            self.assertEqual(client.get(detail_url).json()["progress"], 25)
             self.assertEqual(client.post(detail_url + "/subactions", json={"title": " ", "due_date": "2026-09-11"}).status_code, 422)
+            for url, detail in [(f"/api/priorities/{priority['id']}/status", f"/api/priorities/{priority['id']}"), (detail_url + "/status", detail_url)]:
+                for value in ("At Risk", "Off Track", "On Track"):
+                    self.assertEqual(client.patch(url, json={"status": value}).status_code, 200)
+                    self.assertEqual(client.get(detail).json()["status"], value)
+                for value in ("unknown", "", None):
+                    self.assertEqual(client.patch(url, json={"status": value}).status_code, 422)
+                self.assertEqual(client.get(detail).json()["status"], "On Track")
+            for resource in ("actions", "priorities"):
+                self.assertEqual(client.patch(f"/api/{resource}/99999/status", json={"status": "At Risk"}).status_code, 404)
+            client.patch(detail_url + "/status", json={"status": "At Risk"})
+            self.assertEqual(client.get("/api/dashboard/stats").json()["at_risk_count"], 1)
+            self.assertEqual(client.get(action_url).json()[0]["status"], "At Risk")
+            self.assertEqual(client.get(detail_url).json()["progress"], 25)
+            client.patch(detail_url + "/status", json={"status": "On Track"})
             sub_payload = {"title": "Step", "due_date": "2026-09-11"}
             commits.clear()
             sub = post(detail_url + "/subactions", sub_payload)
@@ -50,10 +66,20 @@ class AppRegressionTest(unittest.TestCase):
             second = post(detail_url + "/subactions", sub_payload)
             self.assertEqual(client.get(detail_url).json()["progress"], 50)
 
-            # Cached values may be stale in an existing database; GETs must agree without writing.
-            with module.SessionLocal() as db:
-                db.get(module.Action, action["id"]).progress = 7
-                db.commit()
+            # Manual percentages persist across reads and roll up to priorities/dashboard.
+            progress_url = detail_url + "/progress"
+            for invalid in (-1, 101, None, "bad", True):
+                self.assertEqual(client.patch(progress_url, json={"progress": invalid}).status_code, 422)
+            self.assertEqual(client.patch("/api/actions/99999/progress", json={"progress": 25}).status_code, 404)
+            for value in (0, 100, 37.5):
+                response = client.patch(progress_url, json={"progress": value})
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()["progress"], value)
+                self.assertEqual(client.get(detail_url).json()["progress"], value)
+                self.assertEqual(client.get("/api/priorities").json()[0]["progress"], value)
+                self.assertEqual(client.get("/api/dashboard/stats").json()["overall_progress"], value)
+            self.assertTrue(client.get(detail_url).json()["subactions"][0]["completed"])
+            self.assertEqual(client.patch(progress_url, json={"progress": 50}).status_code, 200)
             commits.clear()
             self.assertEqual(client.get("/api/actions").json()[0]["progress"], 50)
             self.assertEqual(client.get(detail_url).json()["progress"], 50)
@@ -83,10 +109,10 @@ class AppRegressionTest(unittest.TestCase):
                 post(f"/api/priorities/{other['id']}/actions", payload)
             statements.clear()
             client.get("/api/priorities")
-            self.assertEqual(len(statements), 3)
+            self.assertEqual(len(statements), 2)
             statements.clear()
             client.get("/api/actions")
-            self.assertEqual(len(statements), 2)
+            self.assertEqual(len(statements), 1)
             self.assertEqual(client.delete(f"/api/priorities/{priority['id']}").status_code, 200)
             self.assertEqual(client.get(detail_url).status_code, 404)
             self.assertEqual(client.patch(toggle_url).status_code, 404)

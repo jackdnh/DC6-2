@@ -25,11 +25,12 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
   </style>
+  <link rel="stylesheet" href="common.css">
 </head>
 <body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
 
   <!-- Mobile iOS Frame Container -->
-  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+  <div class="app-frame w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
     
     <!-- iOS Status Bar -->
     <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
@@ -56,6 +57,7 @@
 
     <!-- Scrollable Main Content -->
     <main class="flex-1 overflow-y-auto px-5 py-2 pb-24">
+      <p id="load-error" role="alert" class="text-xs text-rose-600"></p>
 
       <!-- ================= TAB 1: OVERVIEW (Screen 3) ================= -->
       <div id="tab-overview" class="space-y-4">
@@ -100,14 +102,13 @@
             </span>
           </div>
 
-          <!-- Status -->
           <div class="flex items-center justify-between text-xs">
-            <span class="text-[11px] font-bold text-slate-800">Status</span>
-            <span class="text-xs font-medium flex items-center space-x-1.5">
-              <span id="overview-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-              <span id="overview-status-text" class="text-slate-800">On Track</span>
-            </span>
+            <label for="status-input" class="text-[11px] font-bold text-slate-800">Status</label>
+            <select id="status-input" disabled aria-describedby="status-feedback" class="border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500">
+              <option>On Track</option><option>At Risk</option><option>Off Track</option>
+            </select>
           </div>
+          <p id="status-feedback" role="status" class="text-[10px] text-slate-500"></p>
 
           <!-- Actions Clickable Row -->
           <button onclick="switchTab('actions')" class="w-full flex items-center justify-between text-xs pt-2 border-t border-slate-100 hover:text-blue-600 transition group text-left">
@@ -129,7 +130,7 @@
         <div class="relative flex items-center bg-slate-100 rounded-xl px-3 py-2 text-xs">
           <svg class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input 
-            id="actions-search-input" 
+            aria-label="Search actions" id="actions-search-input"
             type="text" 
             placeholder="Search Actions" 
             class="w-full bg-transparent focus:outline-none text-slate-800 placeholder-slate-400 text-xs"
@@ -138,18 +139,18 @@
 
         <!-- 3 Stat Summary Boxes (On track, At risk, Off track) matching Screen 4 -->
         <div class="grid grid-cols-3 gap-2 text-center py-1">
-          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+          <button type="button" data-status-filter="On Track" aria-pressed="false" onclick="toggleStatusFilter('On Track')" class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
             <span id="metric-on-track" class="text-xl font-bold text-emerald-600 block leading-tight">0</span>
             <span class="text-[10px] text-slate-500 font-medium">On track</span>
-          </div>
-          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+          </button>
+          <button type="button" data-status-filter="At Risk" aria-pressed="false" onclick="toggleStatusFilter('At Risk')" class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
             <span id="metric-at-risk" class="text-xl font-bold text-amber-500 block leading-tight">0</span>
             <span class="text-[10px] text-slate-500 font-medium">At risk</span>
-          </div>
-          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+          </button>
+          <button type="button" data-status-filter="Off Track" aria-pressed="false" onclick="toggleStatusFilter('Off Track')" class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
             <span id="metric-off-track" class="text-xl font-bold text-rose-500 block leading-tight">0</span>
             <span class="text-[10px] text-slate-500 font-medium">Off track</span>
-          </div>
+          </button>
         </div>
 
         <!-- Actions List matching Screen 4 -->
@@ -198,6 +199,15 @@
 
     let currentPriority = null;
     let actionsSearchQuery = '';
+    let selectedStatus = '';
+
+    function toggleStatusFilter(status) {
+      selectedStatus = selectedStatus === status ? '' : status;
+      updateStatusFilters(selectedStatus);
+      renderActionsList();
+    }
+
+    setupStatusEditor(`${API_BASE}/api/priorities/${priorityId}/status`, () => currentPriority, loadPriorityDetails);
 
     function updateClock() {
       const now = new Date();
@@ -206,7 +216,7 @@
       const timeElem = document.getElementById('current-time');
       if (timeElem) timeElem.textContent = `${hours}:${mins}`;
     }
-    setInterval(updateClock, 1000);
+    setInterval(updateClock, 15000);
     updateClock();
 
     function switchTab(tab) {
@@ -257,29 +267,25 @@
 
       document.getElementById('header-add-action-btn').href = `create_action.html?priority_id=${priorityId}`;
 
+      document.getElementById('load-error').textContent = '';
       try {
         const res = await apiFetch(`${API_BASE}/api/priorities/${priorityId}`);
         if (!res.ok) throw new Error('Not found');
         currentPriority = await res.json();
+        document.getElementById('status-input').value = currentPriority.status;
+        document.getElementById('status-input').disabled = false;
 
         // Render Screen 3 Overview
         document.getElementById('priority-code').textContent = `SP${currentPriority.id}`;
         document.getElementById('priority-title').textContent = currentPriority.title;
         
-        const progressPercent = Math.round(currentPriority.progress ?? 0);
+        const progressPercent = (currentPriority.progress ?? 0);
         document.getElementById('overview-progress-text').textContent = `${progressPercent}%`;
         document.getElementById('overview-progress-bar').style.width = `${progressPercent}%`;
         
         document.getElementById('overview-desc').textContent = currentPriority.description || 'No description provided.';
         document.getElementById('overview-owner').textContent = currentPriority.owner;
         document.getElementById('overview-date').textContent = currentPriority.target_date;
-        document.getElementById('overview-status-text').textContent = currentPriority.status;
-
-        const dot = document.getElementById('overview-status-dot');
-        if (currentPriority.status === 'At Risk') dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 inline-block';
-        else if (currentPriority.status === 'Off Track') dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 inline-block';
-        else dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block';
-
         const actions = currentPriority.actions || [];
         const actionsCount = actions.length;
         document.getElementById('overview-actions-count').textContent = `${actionsCount} Actions`;
@@ -296,9 +302,11 @@
 
         renderActionsList();
 
+        return true;
       } catch (err) {
         console.error(err);
-        alert(err.message || "Unable to complete the request. Please try again.");
+        document.getElementById('load-error').textContent = `${err.message || 'Unable to load details'}. Reload the page to try again.`;
+        return false;
       }
     }
 
@@ -307,6 +315,7 @@
       const actions = currentPriority ? (currentPriority.actions || []) : [];
 
       const filtered = actions.filter(a => {
+        if (selectedStatus && a.status !== selectedStatus) return false;
         if (!actionsSearchQuery) return true;
         const q = actionsSearchQuery.toLowerCase();
         return a.title.toLowerCase().includes(q) || (a.description && a.description.toLowerCase().includes(q));
@@ -328,7 +337,7 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="text-center py-6 text-xs text-slate-400">
-            No actions matching "${escapeHtml(actionsSearchQuery)}".
+            No actions match the selected status and search.
           </div>
         `;
         return;
@@ -336,7 +345,7 @@
 
       container.innerHTML = filtered.map(a => {
         const codeTag = `SP${currentPriority.id}-A${a.id}`;
-        const p = Math.round(a.progress ?? 0);
+        const p = (a.progress ?? 0);
 
         let statusText = 'On track';
         let statusClass = 'text-emerald-600';

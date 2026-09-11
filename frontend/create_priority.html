@@ -25,11 +25,12 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
   </style>
+  <link rel="stylesheet" href="common.css">
 </head>
 <body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
 
   <!-- Mobile iOS Frame Container -->
-  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+  <div class="app-frame w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
     
     <!-- iOS Status Bar -->
     <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
@@ -95,16 +96,10 @@
                 name="owner" 
                 required
                 list="owner-options"
-                placeholder="Select owner" 
+                placeholder="Type or select a name"
                 class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition pr-8"
               >
-              <datalist id="owner-options">
-                <option value="Jack Pollard">
-                <option value="Sarah Jenkins">
-                <option value="Darren Abraham">
-                <option value="Liam Reynolds">
-                <option value="Alex Rivera">
-              </datalist>
+              <datalist id="owner-options"></datalist>
               <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
                 <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
               </div>
@@ -149,6 +144,7 @@
   <script src="common.js"></script>
   <script>
     const API_BASE = 'http://127.0.0.1:8000';
+    setupNameSuggestions('owner', 'owner-options');
 
     function updateClock() {
       const now = new Date();
@@ -157,7 +153,7 @@
       const timeElem = document.getElementById('current-time');
       if (timeElem) timeElem.textContent = `${hours}:${mins}`;
     }
-    setInterval(updateClock, 1000);
+    setInterval(updateClock, 15000);
     updateClock();
 
     // Default target date to 30 days ahead
@@ -168,6 +164,7 @@
     document.getElementById('priority-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
+      if (btn.disabled) return;
       btn.disabled = true;
       btn.textContent = 'Creating...';
 
