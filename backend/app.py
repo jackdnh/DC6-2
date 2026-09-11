@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import date, datetime, timezone
+from typing import Annotated, List, Literal, Optional
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, StringConstraints
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session, selectinload
 
 from pathlib import Path
 
@@ -106,6 +106,8 @@ def calculate_action_progress(action: Action) -> float:
 
 
 def update_action_progress(action: Action, db: Session) -> float:
+    db.flush()
+    db.expire(action, ["subactions"])
     action.progress = calculate_action_progress(action)
     db.commit()
     db.refresh(action)
@@ -116,16 +118,27 @@ def calculate_priority_progress(priority: Priority) -> float:
     """Priority progress equals average of linked actions' progress percentages, or 0.0."""
     if not priority.actions:
         return 0.0
-    total_progress = sum(a.progress for a in priority.actions)
+    total_progress = sum(calculate_action_progress(a) for a in priority.actions)
     return round(total_progress / len(priority.actions), 1)
 
 
 # ==========================================
 # Pydantic v2 Schemas
 # ==========================================
+def validate_date(value: str) -> str:
+    if date.fromisoformat(value).isoformat() != value:
+        raise ValueError("Use YYYY-MM-DD for dates")
+    return value
+
+
+RequiredText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+DateText = Annotated[RequiredText, AfterValidator(validate_date)]
+TrackingStatus = Literal["On Track", "At Risk", "Off Track"]
+
+
 class SubActionCreate(BaseModel):
-    title: str
-    due_date: str
+    title: RequiredText
+    due_date: DateText
 
 
 class SubActionResponse(BaseModel):
@@ -139,10 +152,10 @@ class SubActionResponse(BaseModel):
 
 
 class ReviewCreate(BaseModel):
-    reviewer_name: str
-    date: str
-    comment: str
-    status: str  # "Approved" or "Needs Improvement"
+    reviewer_name: RequiredText
+    date: DateText
+    comment: RequiredText
+    status: Literal["Approved", "Needs Improvement"]
 
 
 class ReviewResponse(BaseModel):
@@ -157,11 +170,11 @@ class ReviewResponse(BaseModel):
 
 
 class ActionCreate(BaseModel):
-    title: str
+    title: RequiredText
     description: Optional[str] = ""
-    owner: str
-    target_date: str
-    status: Optional[str] = "On Track"
+    owner: RequiredText
+    target_date: DateText
+    status: TrackingStatus = "On Track"
 
 
 class ActionResponse(BaseModel):
@@ -184,11 +197,11 @@ class ActionDetailResponse(ActionResponse):
 
 
 class PriorityCreate(BaseModel):
-    title: str
+    title: RequiredText
     description: Optional[str] = ""
-    owner: str
-    target_date: str
-    status: Optional[str] = "On Track"
+    owner: RequiredText
+    target_date: DateText
+    status: TrackingStatus = "On Track"
 
 
 class PriorityResponse(BaseModel):
@@ -231,7 +244,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -239,8 +252,8 @@ app.add_middleware(
 
 @app.get("/api/dashboard/stats", response_model=DashboardStatsResponse)
 def get_dashboard_stats(db: Session = Depends(get_db)):
-    priorities = db.query(Priority).all()
-    actions = db.query(Action).all()
+    priorities = db.query(Priority).options(selectinload(Priority.actions).selectinload(Action.subactions)).all()
+    actions = [action for priority in priorities for action in priority.actions]
 
     priorities_count = len(priorities)
     actions_count = len(actions)
@@ -252,7 +265,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     else:
         overall_progress = 0.0
 
-    completed_count = sum(1 for a in actions if a.progress >= 100.0)
+    completed_count = sum(1 for a in actions if calculate_action_progress(a) >= 100.0)
 
     # Status counts: based on actions if actions exist, otherwise priorities
     if actions:
@@ -277,7 +290,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
 
 @app.get("/api/priorities", response_model=List[PriorityResponse])
 def get_priorities(db: Session = Depends(get_db)):
-    priorities = db.query(Priority).order_by(Priority.created_at.desc()).all()
+    priorities = db.query(Priority).options(selectinload(Priority.actions).selectinload(Action.subactions)).order_by(Priority.created_at.desc()).all()
     results = []
     for p in priorities:
         results.append(
@@ -323,12 +336,12 @@ def create_priority(payload: PriorityCreate, db: Session = Depends(get_db)):
 
 @app.get("/api/priorities/{priority_id}", response_model=PriorityDetailResponse)
 def get_priority_detail(priority_id: int, db: Session = Depends(get_db)):
-    priority = db.query(Priority).filter(Priority.id == priority_id).first()
+    priority = db.query(Priority).options(selectinload(Priority.actions).selectinload(Action.subactions)).filter(Priority.id == priority_id).first()
     if not priority:
         raise HTTPException(status_code=404, detail="Priority not found")
 
     actions_response = [
-        ActionResponse.model_validate(action) for action in priority.actions
+        ActionResponse.model_validate(action).model_copy(update={"progress": calculate_action_progress(action)}) for action in priority.actions
     ]
 
     return PriorityDetailResponse(
@@ -347,10 +360,10 @@ def get_priority_detail(priority_id: int, db: Session = Depends(get_db)):
 
 @app.get("/api/priorities/{priority_id}/actions", response_model=List[ActionResponse])
 def get_priority_actions(priority_id: int, db: Session = Depends(get_db)):
-    priority = db.query(Priority).filter(Priority.id == priority_id).first()
+    priority = db.query(Priority).options(selectinload(Priority.actions).selectinload(Action.subactions)).filter(Priority.id == priority_id).first()
     if not priority:
         raise HTTPException(status_code=404, detail="Priority not found")
-    return [ActionResponse.model_validate(action) for action in priority.actions]
+    return [ActionResponse.model_validate(action).model_copy(update={"progress": calculate_action_progress(action)}) for action in priority.actions]
 
 
 @app.post("/api/priorities/{priority_id}/actions", response_model=ActionResponse, status_code=status.HTTP_201_CREATED)
@@ -376,11 +389,8 @@ def create_priority_action(priority_id: int, payload: ActionCreate, db: Session 
 
 @app.get("/api/actions", response_model=List[ActionResponse])
 def get_all_actions(db: Session = Depends(get_db)):
-    actions = db.query(Action).all()
-    # Refresh progress for each
-    for a in actions:
-        update_action_progress(a, db)
-    return [ActionResponse.model_validate(a) for a in actions]
+    actions = db.query(Action).options(selectinload(Action.subactions)).all()
+    return [ActionResponse.model_validate(a).model_copy(update={"progress": calculate_action_progress(a)}) for a in actions]
 
 
 @app.get("/api/actions/{action_id}", response_model=ActionDetailResponse)
@@ -390,7 +400,7 @@ def get_action_detail(action_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Action not found")
 
     # Refresh progress based on current subactions
-    progress = update_action_progress(action, db)
+    progress = calculate_action_progress(action)
 
     subactions = [SubActionResponse.model_validate(s) for s in action.subactions]
     reviews = [ReviewResponse.model_validate(r) for r in action.reviews]
@@ -423,10 +433,7 @@ def create_subaction(action_id: int, payload: SubActionCreate, db: Session = Dep
         completed=False
     )
     db.add(subaction)
-    db.commit()
-    db.refresh(subaction)
-
-    # Recalculate parent progress
+    # Save the subaction and parent progress in one transaction.
     update_action_progress(action, db)
     return SubActionResponse.model_validate(subaction)
 
@@ -438,9 +445,6 @@ def toggle_subaction(subaction_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="SubAction not found")
 
     subaction.completed = not subaction.completed
-    db.commit()
-    db.refresh(subaction)
-
     # Trigger recalculation of parent action progress
     action = subaction.action
     new_progress = update_action_progress(action, db)
@@ -497,6 +501,5 @@ def delete_subaction(subaction_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="SubAction not found")
     action = subaction.action
     db.delete(subaction)
-    db.commit()
     update_action_progress(action, db)
     return {"message": "SubAction deleted successfully"}

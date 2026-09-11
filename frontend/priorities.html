@@ -86,6 +86,7 @@
 
   </div>
 
+  <script src="common.js"></script>
   <script>
     const API_BASE = 'http://127.0.0.1:8000';
 
@@ -112,11 +113,17 @@
       if (isActionsView) {
         pageTitle.textContent = 'Actions';
         searchInput.placeholder = 'Search Actions';
+        const addLink = document.querySelector('header a[title="Create Priority"]');
+        addLink.href = 'priorities.html';
+        addLink.title = 'Choose a priority to create an action';
+        const priorityLink = document.querySelector('nav a[href="priorities.html"]');
+        const actionLink = document.querySelector('nav a[href="priorities.html?view=actions"]');
+        [priorityLink.className, actionLink.className] = [actionLink.className, priorityLink.className];
       }
 
       try {
         const endpoint = isActionsView ? `${API_BASE}/api/actions` : `${API_BASE}/api/priorities`;
-        const res = await fetch(endpoint);
+        const res = await apiFetch(endpoint);
         if (!res.ok) throw new Error('Network error');
         items = await res.json();
         renderList();
@@ -152,7 +159,7 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="text-center py-8 text-xs text-slate-400">
-            No items matching "${searchQuery}".
+            No items matching "${escapeHtml(searchQuery)}".
           </div>
         `;
         return;
@@ -160,7 +167,7 @@
 
       container.innerHTML = filtered.map((it, idx) => {
         // Code tag SP1, SP2, etc.
-        const codeTag = isActionsView ? `SP1-A${it.id}` : `SP${it.id}`;
+        const codeTag = isActionsView ? `SP${it.priority_id}-A${it.id}` : `SP${it.id}`;
         
         // Status indicator color on left edge & progress bar
         let barBg = 'bg-emerald-500';
@@ -178,7 +185,7 @@
             
             <div class="p-3.5 flex-1 min-w-0">
               <span class="text-xs font-bold text-slate-900 block">${codeTag}</span>
-              <p class="text-xs text-slate-600 font-medium mt-0.5 truncate">${it.title}</p>
+              <p class="text-xs text-slate-600 font-medium mt-0.5 truncate">${escapeHtml(it.title)}</p>
               
               <!-- Progress Percentage & Bar -->
               <div class="mt-2.5 flex items-center space-x-2">

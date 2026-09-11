@@ -275,6 +275,7 @@
 
   </div>
 
+  <script src="common.js"></script>
   <script>
     const API_BASE = 'http://127.0.0.1:8000';
 
@@ -294,7 +295,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = localDate();
     document.getElementById('new-subaction-date').value = todayStr;
     document.getElementById('rev-date').value = todayStr;
 
@@ -335,7 +336,7 @@
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/actions/${actionId}`);
+        const res = await apiFetch(`${API_BASE}/api/actions/${actionId}`);
         if (!res.ok) throw new Error('Action not found');
         currentAction = await res.json();
 
@@ -348,7 +349,7 @@
 
         // Render Tab 1 (Overview - Screen 5)
         document.getElementById('action-title').textContent = currentAction.title;
-        document.getElementById('action-desc').textContent = currentAction.description || 'Define clear success criteria for improving company use of github';
+        document.getElementById('action-desc').textContent = currentAction.description || 'No description provided.';
         document.getElementById('overview-progress-text').textContent = `${p}%`;
         document.getElementById('overview-progress-bar').style.width = `${p}%`;
         document.getElementById('overview-priority-name').textContent = currentAction.priority_title || 'Priority';
@@ -373,6 +374,7 @@
 
       } catch (err) {
         console.error(err);
+        alert(err.message || "Unable to complete the request. Please try again.");
       }
     }
 
@@ -442,11 +444,11 @@
 
         return `
           <div class="bg-white rounded-2xl p-3 border border-slate-100 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] flex items-center justify-between transition">
-            <div class="flex items-center space-x-2.5 flex-1 min-w-0 cursor-pointer" onclick="toggleSubAction(${s.id})">
+            <div class="flex items-center space-x-2.5 flex-1 min-w-0 cursor-pointer" role="checkbox" tabindex="0" aria-checked="${s.completed}" aria-label="${escapeHtml(s.title)}" onkeydown="if(event.key === ' ' || event.key === 'Enter') { event.preventDefault(); toggleSubAction(${s.id}); }" onclick="toggleSubAction(${s.id})">
               ${checkIcon}
               <div class="min-w-0 flex-1">
-                <span class="text-xs font-bold text-slate-800 block truncate ${s.completed ? 'line-through text-slate-400 font-normal' : ''}">${s.title}</span>
-                <span class="text-[10px] text-slate-400 block mt-0.5">Due ${s.due_date}</span>
+                <span class="text-xs font-bold text-slate-800 block truncate ${s.completed ? 'line-through text-slate-400 font-normal' : ''}">${escapeHtml(s.title)}</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Due ${escapeHtml(s.due_date)}</span>
               </div>
             </div>
             <button onclick="deleteSubAction(${s.id})" class="text-slate-300 hover:text-rose-500 p-1 transition ml-2" title="Delete">
@@ -459,20 +461,22 @@
 
     async function toggleSubAction(subId) {
       try {
-        const res = await fetch(`${API_BASE}/api/subactions/${subId}/toggle`, { method: 'PATCH' });
+        const res = await apiFetch(`${API_BASE}/api/subactions/${subId}/toggle`, { method: 'PATCH' });
         if (!res.ok) throw new Error('Toggle failed');
         await loadActionDetail();
       } catch (err) {
         console.error(err);
+        alert(err.message || "Unable to complete the request. Please try again.");
       }
     }
 
     async function deleteSubAction(subId) {
       try {
-        await fetch(`${API_BASE}/api/subactions/${subId}`, { method: 'DELETE' });
+        await apiFetch(`${API_BASE}/api/subactions/${subId}`, { method: 'DELETE' });
         await loadActionDetail();
       } catch (err) {
         console.error(err);
+        alert(err.message || "Unable to complete the request. Please try again.");
       }
     }
 
@@ -483,7 +487,7 @@
       if (!title || !due_date) return;
 
       try {
-        const res = await fetch(`${API_BASE}/api/actions/${actionId}/subactions`, {
+        const res = await apiFetch(`${API_BASE}/api/actions/${actionId}/subactions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, due_date })
@@ -494,6 +498,7 @@
         }
       } catch (err) {
         console.error(err);
+        alert(err.message || "Unable to complete the request. Please try again.");
       }
     });
 
@@ -530,17 +535,17 @@
           <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)] space-y-2">
             <div class="flex items-center space-x-2.5">
               <div class="w-7 h-7 rounded-full ${avatarBg} text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                (${getInitials(r.reviewer_name)})
+                (${escapeHtml(getInitials(r.reviewer_name))})
               </div>
-              <span class="text-xs font-bold text-slate-900">${r.reviewer_name}</span>
+              <span class="text-xs font-bold text-slate-900">${escapeHtml(r.reviewer_name)}</span>
             </div>
 
             <p class="text-xs text-slate-600 font-medium pl-9 leading-snug">
-              ${r.comment}
+              ${escapeHtml(r.comment)}
             </p>
 
             <div class="flex items-center justify-between pt-1 text-[10px] pl-9">
-              <span class="text-slate-400">${r.date}</span>
+              <span class="text-slate-400">${escapeHtml(r.date)}</span>
               <span class="px-2 py-0.5 rounded-full border ${badgeColor} font-semibold">
                 ${badgeText}
               </span>
@@ -560,7 +565,7 @@
       if (!reviewer_name || !date || !comment) return;
 
       try {
-        const res = await fetch(`${API_BASE}/api/actions/${actionId}/reviews`, {
+        const res = await apiFetch(`${API_BASE}/api/actions/${actionId}/reviews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ reviewer_name, date, status, comment })
@@ -571,16 +576,18 @@
         }
       } catch (err) {
         console.error(err);
+        alert(err.message || "Unable to complete the request. Please try again.");
       }
     });
 
     document.getElementById('delete-action-btn').addEventListener('click', async () => {
-      if (!confirm('Delete this action?')) return;
+      if (!currentAction || !confirm('Delete this action?')) return;
       try {
-        await fetch(`${API_BASE}/api/actions/${actionId}`, { method: 'DELETE' });
+        await apiFetch(`${API_BASE}/api/actions/${actionId}`, { method: 'DELETE' });
         window.location.href = `priority_detail.html?id=${currentAction.priority_id}`;
       } catch (err) {
         console.error(err);
+        alert(err.message || "Unable to complete the request. Please try again.");
       }
     });
 
