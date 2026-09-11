@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Priority Details - Development Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #64748b; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
+
+  <!-- Mobile iOS Frame Container -->
+  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+    
+    <!-- iOS Status Bar -->
+    <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
+      <span id="current-time" class="font-bold text-xs tracking-tight">9:41</span>
+      <div class="w-24 h-4 bg-black rounded-full mx-auto shadow-inner"></div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-4h3v13h-3V8zm6-5h3v18h-3V3z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.67 0 7.02 1.41 9.53 3.73L12 19.46 2.47 11.23C4.98 8.91 8.33 7.5 12 7.5z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-900 rounded-sm p-0.5 flex items-center">
+          <div class="h-full w-3.5 bg-slate-900 rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header (< Priority details / SP1 Actions +) -->
+    <header class="px-5 pt-3 pb-2 flex items-center justify-between shrink-0">
+      <a href="priorities.html" class="text-slate-800 hover:text-slate-600 p-1">
+        <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+      </a>
+      <h1 id="header-title" class="text-sm font-bold text-slate-800 tracking-tight">Priority details</h1>
+      <a id="header-add-action-btn" href="#" class="hidden text-blue-600 hover:text-blue-700 text-xl font-bold p-1 leading-none" title="Create Action">+</a>
+      <div id="header-spacer" class="w-4 h-4"></div>
+    </header>
+
+    <!-- Scrollable Main Content -->
+    <main class="flex-1 overflow-y-auto px-5 py-2 pb-24">
+
+      <!-- ================= TAB 1: OVERVIEW (Screen 3) ================= -->
+      <div id="tab-overview" class="space-y-4">
+        
+        <!-- Priority Card matching Screen 3 -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] space-y-3">
+          
+          <div>
+            <span id="priority-code" class="text-xs font-bold text-slate-900 block">SP1</span>
+            <h2 id="priority-title" class="text-xs text-slate-600 font-medium mt-0.5">Loading Priority...</h2>
+          </div>
+
+          <!-- Overall Progress -->
+          <div>
+            <span class="text-[11px] font-bold text-slate-800 block mb-1">Overall Progress</span>
+            <div class="flex items-center space-x-2">
+              <span id="overview-progress-text" class="text-xs font-bold text-slate-900 shrink-0 w-8">0%</span>
+              <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div id="overview-progress-bar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <span class="text-[11px] font-bold text-slate-800 block mb-0.5">Description</span>
+            <p id="overview-desc" class="text-[11px] text-slate-500 leading-relaxed">--</p>
+          </div>
+
+          <!-- Owner -->
+          <div class="flex items-center justify-between text-xs pt-1">
+            <span class="text-[11px] font-bold text-slate-800">Owner</span>
+            <span id="overview-owner" class="text-xs text-slate-700 font-medium">--</span>
+          </div>
+
+          <!-- Target Date -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[11px] font-bold text-slate-800">Target Date</span>
+            <span class="text-xs text-slate-700 font-medium flex items-center space-x-1">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span id="overview-date">--</span>
+            </span>
+          </div>
+
+          <!-- Status -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[11px] font-bold text-slate-800">Status</span>
+            <span class="text-xs font-medium flex items-center space-x-1.5">
+              <span id="overview-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+              <span id="overview-status-text" class="text-slate-800">On Track</span>
+            </span>
+          </div>
+
+          <!-- Actions Clickable Row -->
+          <button onclick="switchTab('actions')" class="w-full flex items-center justify-between text-xs pt-2 border-t border-slate-100 hover:text-blue-600 transition group text-left">
+            <span class="text-[11px] font-bold text-slate-800 group-hover:text-blue-600">Actions</span>
+            <span class="text-xs text-slate-600 group-hover:text-blue-600 font-medium flex items-center space-x-1">
+              <span id="overview-actions-count">0 Actions</span>
+              <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </span>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- ================= TAB 2: ACTIONS (Screen 4) ================= -->
+      <div id="tab-actions" class="hidden space-y-3">
+        
+        <!-- Search Actions -->
+        <div class="relative flex items-center bg-slate-100 rounded-xl px-3 py-2 text-xs">
+          <svg class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input 
+            id="actions-search-input" 
+            type="text" 
+            placeholder="Search Actions" 
+            class="w-full bg-transparent focus:outline-none text-slate-800 placeholder-slate-400 text-xs"
+          >
+        </div>
+
+        <!-- 3 Stat Summary Boxes (On track, At risk, Off track) matching Screen 4 -->
+        <div class="grid grid-cols-3 gap-2 text-center py-1">
+          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+            <span id="metric-on-track" class="text-xl font-bold text-emerald-600 block leading-tight">0</span>
+            <span class="text-[10px] text-slate-500 font-medium">On track</span>
+          </div>
+          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+            <span id="metric-at-risk" class="text-xl font-bold text-amber-500 block leading-tight">0</span>
+            <span class="text-[10px] text-slate-500 font-medium">At risk</span>
+          </div>
+          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+            <span id="metric-off-track" class="text-xl font-bold text-rose-500 block leading-tight">0</span>
+            <span class="text-[10px] text-slate-500 font-medium">Off track</span>
+          </div>
+        </div>
+
+        <!-- Actions List matching Screen 4 -->
+        <div id="actions-cards-list" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+
+      <!-- ================= TAB 3: SUCCESS CRITERIA ================= -->
+      <div id="tab-criteria" class="hidden space-y-3">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+          <h3 class="text-xs font-bold text-slate-800 mb-1">Strategic Success Criteria</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            All linked deliverables, criteria, and operational targets must achieve 100% completion with verified qualitative reviews to satisfy audit standards.
+          </p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation Tabs (Overview, Actions(N), Success criteria) matching Screen 3 & 4 -->
+    <nav class="absolute bottom-0 inset-x-0 bg-white border-t border-slate-100 pt-2 pb-2 flex flex-col z-30">
+      <div class="flex items-center justify-around text-xs">
+        <button id="nav-btn-overview" onclick="switchTab('overview')" class="text-xs font-bold text-blue-600 py-1 transition">
+          Overview
+        </button>
+        <button id="nav-btn-actions" onclick="switchTab('actions')" class="text-xs font-medium text-slate-500 hover:text-slate-800 py-1 transition">
+          <span id="nav-actions-label">Actions(0)</span>
+        </button>
+        <button id="nav-btn-criteria" onclick="switchTab('criteria')" class="text-xs font-medium text-slate-500 hover:text-slate-800 py-1 transition">
+          Success criteria
+        </button>
+      </div>
+      <div class="w-32 h-1 bg-black rounded-full mx-auto mt-2"></div>
+    </nav>
+
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const priorityId = urlParams.get('id');
+
+    let currentPriority = null;
+    let actionsSearchQuery = '';
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      const timeElem = document.getElementById('current-time');
+      if (timeElem) timeElem.textContent = `${hours}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function switchTab(tab) {
+      const btnOverview = document.getElementById('nav-btn-overview');
+      const btnActions = document.getElementById('nav-btn-actions');
+      const btnCriteria = document.getElementById('nav-btn-criteria');
+
+      const panelOverview = document.getElementById('tab-overview');
+      const panelActions = document.getElementById('tab-actions');
+      const panelCriteria = document.getElementById('tab-criteria');
+
+      const headerTitle = document.getElementById('header-title');
+      const addActionBtn = document.getElementById('header-add-action-btn');
+      const headerSpacer = document.getElementById('header-spacer');
+
+      // Reset styles
+      [btnOverview, btnActions, btnCriteria].forEach(b => {
+        b.className = 'text-xs font-medium text-slate-500 hover:text-slate-800 py-1 transition';
+      });
+      [panelOverview, panelActions, panelCriteria].forEach(p => p.classList.add('hidden'));
+
+      if (tab === 'actions') {
+        btnActions.className = 'text-xs font-bold text-blue-600 py-1 transition';
+        panelActions.classList.remove('hidden');
+        headerTitle.textContent = currentPriority ? `SP${currentPriority.id} Actions` : 'Actions';
+        addActionBtn.classList.remove('hidden');
+        headerSpacer.classList.add('hidden');
+      } else if (tab === 'criteria') {
+        btnCriteria.className = 'text-xs font-bold text-blue-600 py-1 transition';
+        panelCriteria.classList.remove('hidden');
+        headerTitle.textContent = 'Success Criteria';
+        addActionBtn.classList.add('hidden');
+        headerSpacer.classList.remove('hidden');
+      } else {
+        btnOverview.className = 'text-xs font-bold text-blue-600 py-1 transition';
+        panelOverview.classList.remove('hidden');
+        headerTitle.textContent = 'Priority details';
+        addActionBtn.classList.add('hidden');
+        headerSpacer.classList.remove('hidden');
+      }
+    }
+
+    async function loadPriorityDetails() {
+      if (!priorityId) {
+        window.location.href = 'priorities.html';
+        return;
+      }
+
+      document.getElementById('header-add-action-btn').href = `create_action.html?priority_id=${priorityId}`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/priorities/${priorityId}`);
+        if (!res.ok) throw new Error('Not found');
+        currentPriority = await res.json();
+
+        // Render Screen 3 Overview
+        document.getElementById('priority-code').textContent = `SP${currentPriority.id}`;
+        document.getElementById('priority-title').textContent = currentPriority.title;
+        
+        const progressPercent = Math.round(currentPriority.progress ?? 0);
+        document.getElementById('overview-progress-text').textContent = `${progressPercent}%`;
+        document.getElementById('overview-progress-bar').style.width = `${progressPercent}%`;
+        
+        document.getElementById('overview-desc').textContent = currentPriority.description || 'No description provided.';
+        document.getElementById('overview-owner').textContent = currentPriority.owner;
+        document.getElementById('overview-date').textContent = currentPriority.target_date;
+        document.getElementById('overview-status-text').textContent = currentPriority.status;
+
+        const dot = document.getElementById('overview-status-dot');
+        if (currentPriority.status === 'At Risk') dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 inline-block';
+        else if (currentPriority.status === 'Off Track') dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 inline-block';
+        else dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block';
+
+        const actions = currentPriority.actions || [];
+        const actionsCount = actions.length;
+        document.getElementById('overview-actions-count').textContent = `${actionsCount} Actions`;
+        document.getElementById('nav-actions-label').textContent = `Actions(${actionsCount})`;
+
+        // Render Screen 4 Actions Breakdown
+        const onTrack = actions.filter(a => a.status === 'On Track').length;
+        const atRisk = actions.filter(a => a.status === 'At Risk').length;
+        const offTrack = actions.filter(a => a.status === 'Off Track').length;
+
+        document.getElementById('metric-on-track').textContent = onTrack;
+        document.getElementById('metric-at-risk').textContent = atRisk;
+        document.getElementById('metric-off-track').textContent = offTrack;
+
+        renderActionsList();
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderActionsList() {
+      const container = document.getElementById('actions-cards-list');
+      const actions = currentPriority ? (currentPriority.actions || []) : [];
+
+      const filtered = actions.filter(a => {
+        if (!actionsSearchQuery) return true;
+        const q = actionsSearchQuery.toLowerCase();
+        return a.title.toLowerCase().includes(q) || (a.description && a.description.toLowerCase().includes(q));
+      });
+
+      if (actions.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border border-dashed border-slate-200 p-6 text-center">
+            <h4 class="text-xs font-bold text-slate-800">No actions linked yet</h4>
+            <p class="text-[11px] text-slate-400 mt-1">Tap '+' in the header to create an action.</p>
+            <a href="create_action.html?priority_id=${priorityId}" class="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold shadow">
+              + Add Action
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-400">
+            No actions matching "${actionsSearchQuery}".
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(a => {
+        const codeTag = `SP${currentPriority.id}-A${a.id}`;
+        const p = Math.round(a.progress ?? 0);
+
+        let statusText = 'On track';
+        let statusClass = 'text-emerald-600';
+        let iconHtml = `<svg class="w-3.5 h-3.5 text-emerald-500 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>`;
+        let barColor = 'bg-emerald-500';
+
+        if (a.status === 'At Risk') {
+          statusText = 'At risk !';
+          statusClass = 'text-amber-600';
+          iconHtml = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>`;
+          barColor = 'bg-amber-500';
+        } else if (a.status === 'Off Track') {
+          statusText = 'Off track !';
+          statusClass = 'text-rose-600';
+          iconHtml = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>`;
+          barColor = 'bg-rose-500';
+        }
+
+        return `
+          <a href="action_detail.html?id=${a.id}" class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)] hover:shadow-md transition active:scale-[0.99] block space-y-2">
+            <div>
+              <span class="text-xs font-bold text-slate-900 mr-1.5">${codeTag}</span>
+              <span class="text-xs font-semibold text-slate-800">${a.title}</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] font-bold text-slate-800 shrink-0 w-8">${p}%</span>
+              <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div class="${barColor} h-1.5 rounded-full" style="width: ${p}%"></div>
+              </div>
+            </div>
+
+            <!-- Status with icon matching Screen 4 -->
+            <div class="flex items-center space-x-1.5 text-[11px] ${statusClass} font-medium">
+              <span>${statusText}</span>
+              ${iconHtml}
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPriorityDetails();
+
+      const search = document.getElementById('actions-search-input');
+      if (search) {
+        search.addEventListener('input', (e) => {
+          actionsSearchQuery = e.target.value.trim();
+          renderActionsList();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

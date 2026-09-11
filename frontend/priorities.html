@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Priorities - Development Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #64748b; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
+
+  <!-- Mobile iOS Frame Container -->
+  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+    
+    <!-- iOS Status Bar -->
+    <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
+      <span id="current-time" class="font-bold text-xs tracking-tight">9:41</span>
+      <div class="w-24 h-4 bg-black rounded-full mx-auto shadow-inner"></div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-4h3v13h-3V8zm6-5h3v18h-3V3z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.67 0 7.02 1.41 9.53 3.73L12 19.46 2.47 11.23C4.98 8.91 8.33 7.5 12 7.5z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-900 rounded-sm p-0.5 flex items-center">
+          <div class="h-full w-3.5 bg-slate-900 rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header (< Priorities +) -->
+    <header class="px-5 pt-3 pb-2 flex items-center justify-between shrink-0">
+      <a href="index.html" class="text-slate-800 hover:text-slate-600 p-1">
+        <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+      </a>
+      <h1 id="page-title" class="text-sm font-bold text-slate-800 tracking-tight">Priorities</h1>
+      <a href="create_priority.html" class="text-blue-600 hover:text-blue-700 text-xl font-bold p-1 leading-none" title="Create Priority">+</a>
+    </header>
+
+    <!-- Search Input -->
+    <div class="px-5 py-2">
+      <div class="relative flex items-center bg-slate-100 rounded-xl px-3 py-2 text-xs">
+        <svg class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input 
+          id="search-input" 
+          type="text" 
+          placeholder="Search Priorities" 
+          class="w-full bg-transparent focus:outline-none text-slate-800 placeholder-slate-400 text-xs"
+        >
+      </div>
+    </div>
+
+    <!-- Scrollable Priority List -->
+    <main class="flex-1 overflow-y-auto px-5 py-2 space-y-3 pb-24" id="priorities-list">
+      <!-- Populated dynamically via JS -->
+      <div class="text-center py-12 text-slate-400 text-xs">
+        Loading priorities...
+      </div>
+    </main>
+
+    <!-- Bottom Navigation Bar (Dashboard, Priorities, Actions) -->
+    <nav class="absolute bottom-0 inset-x-0 bg-white border-t border-slate-100 pt-2.5 pb-2 flex flex-col z-30">
+      <div class="flex items-center justify-around text-xs">
+        <a href="index.html" class="font-medium text-slate-600 hover:text-slate-900 text-xs py-1 transition">Dashboard</a>
+        <a href="priorities.html" class="font-bold text-blue-600 text-xs py-1 transition">Priorities</a>
+        <a href="priorities.html?view=actions" class="font-medium text-slate-600 hover:text-slate-900 text-xs py-1 transition">Actions</a>
+      </div>
+      <div class="w-32 h-1 bg-black rounded-full mx-auto mt-2"></div>
+    </nav>
+
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isActionsView = urlParams.get('view') === 'actions';
+
+    let items = [];
+    let searchQuery = '';
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      const timeElem = document.getElementById('current-time');
+      if (timeElem) timeElem.textContent = `${hours}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    async function loadData() {
+      const pageTitle = document.getElementById('page-title');
+      const searchInput = document.getElementById('search-input');
+      
+      if (isActionsView) {
+        pageTitle.textContent = 'Actions';
+        searchInput.placeholder = 'Search Actions';
+      }
+
+      try {
+        const endpoint = isActionsView ? `${API_BASE}/api/actions` : `${API_BASE}/api/priorities`;
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error('Network error');
+        items = await res.json();
+        renderList();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('priorities-list').innerHTML = `
+          <div class="p-4 text-center text-xs text-rose-500">Failed to connect to backend.</div>
+        `;
+      }
+    }
+
+    function renderList() {
+      const container = document.getElementById('priorities-list');
+      const filtered = items.filter(it => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return it.title.toLowerCase().includes(q) || (it.description && it.description.toLowerCase().includes(q)) || (it.owner && it.owner.toLowerCase().includes(q));
+      });
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center mt-4">
+            <h3 class="text-xs font-bold text-slate-800">No ${isActionsView ? 'actions' : 'priorities'} found</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Get started by creating your first record.</p>
+            <a href="${isActionsView ? 'priorities.html' : 'create_priority.html'}" class="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold shadow">
+              ${isActionsView ? 'View Priorities' : '+ Create Priority'}
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-xs text-slate-400">
+            No items matching "${searchQuery}".
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((it, idx) => {
+        // Code tag SP1, SP2, etc.
+        const codeTag = isActionsView ? `SP1-A${it.id}` : `SP${it.id}`;
+        
+        // Status indicator color on left edge & progress bar
+        let barBg = 'bg-emerald-500';
+        if (it.status === 'At Risk') barBg = 'bg-amber-500';
+        else if (it.status === 'Off Track') barBg = 'bg-rose-500';
+
+        const targetUrl = isActionsView ? `action_detail.html?id=${it.id}` : `priority_detail.html?id=${it.id}`;
+
+        const progressPercent = Math.round(it.progress ?? 0);
+
+        return `
+          <a href="${targetUrl}" class="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)] overflow-hidden flex hover:shadow-md transition active:scale-[0.99] block">
+            <!-- Left Colored Accent Bar matching mockup -->
+            <div class="w-1.5 self-stretch ${barBg} shrink-0"></div>
+            
+            <div class="p-3.5 flex-1 min-w-0">
+              <span class="text-xs font-bold text-slate-900 block">${codeTag}</span>
+              <p class="text-xs text-slate-600 font-medium mt-0.5 truncate">${it.title}</p>
+              
+              <!-- Progress Percentage & Bar -->
+              <div class="mt-2.5 flex items-center space-x-2">
+                <span class="text-[11px] font-bold text-slate-800 shrink-0 w-8">${progressPercent}%</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div class="${barBg} h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
+                </div>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        searchQuery = e.target.value.trim();
+        renderList();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Action Hub - Development Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #64748b; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
+
+  <!-- Mobile iOS Frame Container -->
+  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+    
+    <!-- iOS Status Bar -->
+    <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
+      <span id="current-time" class="font-bold text-xs tracking-tight">9:41</span>
+      <div class="w-24 h-4 bg-black rounded-full mx-auto shadow-inner"></div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-4h3v13h-3V8zm6-5h3v18h-3V3z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.67 0 7.02 1.41 9.53 3.73L12 19.46 2.47 11.23C4.98 8.91 8.33 7.5 12 7.5z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-900 rounded-sm p-0.5 flex items-center">
+          <div class="h-full w-3.5 bg-slate-900 rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header (< Actions ...) -->
+    <header class="px-5 pt-3 pb-2 flex items-center justify-between shrink-0">
+      <a id="back-link" href="#" class="text-slate-800 hover:text-slate-600 p-1">
+        <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+      </a>
+      <h1 id="screen-header-title" class="text-sm font-bold text-slate-800 tracking-tight">Actions</h1>
+      <button id="delete-action-btn" class="text-slate-600 hover:text-rose-600 p-1 font-bold text-base" title="Delete Action">
+        &bull;&bull;&bull;
+      </button>
+    </header>
+
+    <!-- Scrollable Main Content -->
+    <main class="flex-1 overflow-y-auto px-5 py-2 pb-24 space-y-4">
+
+      <!-- ================= TAB 1: OVERVIEW (Screen 5) ================= -->
+      <div id="tab-overview" class="space-y-4">
+        
+        <!-- Header Text matching Screen 5 -->
+        <div>
+          <h2 id="action-title" class="text-sm font-bold text-slate-900">Define Success Criteria</h2>
+          <p id="action-desc" class="text-[11px] text-slate-500 font-medium mt-0.5 leading-relaxed">
+            Define clear success criteria for improving company use of github
+          </p>
+        </div>
+
+        <!-- Action Card matching Screen 5 -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] space-y-3">
+          
+          <!-- Overall Progress -->
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-800 mb-1">
+              <span>Overall Progress</span>
+              <span id="overview-progress-text" class="text-xs font-bold text-slate-900">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div id="overview-progress-bar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Priority Link Row -->
+          <a id="priority-link-row" href="#" class="flex items-center justify-between text-xs pt-1 hover:text-blue-600 transition group">
+            <span class="text-[11px] font-bold text-slate-800">Priority</span>
+            <span class="text-xs text-slate-600 group-hover:text-blue-600 font-medium flex items-center space-x-1">
+              <span id="overview-priority-name">--</span>
+              <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </span>
+          </a>
+
+          <!-- Owner Row -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[11px] font-bold text-slate-800">Owner</span>
+            <span id="overview-owner" class="text-xs text-slate-700 font-medium">--</span>
+          </div>
+
+          <!-- Target Date Row -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[11px] font-bold text-slate-800">Target Date</span>
+            <span class="text-xs text-slate-700 font-medium flex items-center space-x-1">
+              <span id="overview-target-date">--</span>
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </span>
+          </div>
+
+          <!-- Completion Row -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[11px] font-bold text-slate-800">Completion</span>
+            <span id="overview-completion-status" class="text-xs font-semibold text-emerald-600">In Progress</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ================= TAB 2: SUB-ACTIONS (Screen 6) ================= -->
+      <div id="tab-subactions" class="hidden space-y-3">
+        
+        <!-- Summary Card on top of Screen 6 -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)] space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-1.5 truncate">
+              <span id="subaction-header-code" class="text-xs font-bold text-slate-900">SP1-A1</span>
+              <span id="subaction-header-title" class="text-xs text-slate-700 font-semibold truncate">Provide GitHub training</span>
+            </div>
+            <span id="subactions-top-percent" class="text-xs font-bold text-slate-900 shrink-0">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div id="subactions-top-bar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Filter Chips: All N, Completed N, Open N matching Screen 6 -->
+        <div class="flex items-center space-x-2 text-xs pt-1">
+          <button id="chip-all" onclick="setSubFilter('All')" class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-sm transition">
+            All <span id="chip-count-all">0</span>
+          </button>
+          <button id="chip-completed" onclick="setSubFilter('Completed')" class="px-3 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+            Completed <span id="chip-count-completed">0</span>
+          </button>
+          <button id="chip-open" onclick="setSubFilter('Open')" class="px-3 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+            Open <span id="chip-count-open">0</span>
+          </button>
+        </div>
+
+        <!-- Checklist Items matching Screen 6 -->
+        <div id="subactions-list" class="space-y-2.5 pt-1">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Add Sub-Action Card -->
+        <div class="bg-white rounded-2xl p-3 border border-slate-100 shadow-sm mt-3">
+          <span class="text-[10px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">+ Add Sub-Action</span>
+          <form id="add-subaction-form" class="space-y-2">
+            <input 
+              type="text" 
+              id="new-subaction-title" 
+              required 
+              placeholder="e.g., Create account for everyone" 
+              class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <div class="flex items-center space-x-2">
+              <input 
+                type="date" 
+                id="new-subaction-date" 
+                required 
+                class="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <button 
+                type="submit" 
+                class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition active:scale-95 whitespace-nowrap"
+              >
+                Add Item
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- ================= TAB 3: REVIEWS (Screen 7) ================= -->
+      <div id="tab-reviews" class="hidden space-y-3">
+        
+        <!-- Summary Card on top of Screen 7 -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)] space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-1.5 truncate">
+              <span id="reviews-header-code" class="text-xs font-bold text-slate-900">SP1-A1</span>
+              <span id="reviews-header-title" class="text-xs text-slate-700 font-semibold truncate">Provide GitHub training</span>
+            </div>
+            <span id="reviews-top-percent" class="text-xs font-bold text-slate-900 shrink-0">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div id="reviews-top-bar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Reviews List matching Screen 7 -->
+        <div id="reviews-list" class="space-y-3 pt-1">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Add Review Form -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-sm mt-3">
+          <span class="text-[10px] font-bold text-slate-700 uppercase tracking-wider block mb-2">+ Add Review Assessment</span>
+          <form id="add-review-form" class="space-y-2.5">
+            <div class="grid grid-cols-2 gap-2">
+              <input 
+                type="text" 
+                id="rev-name" 
+                required 
+                placeholder="Reviewer name" 
+                class="border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <input 
+                type="date" 
+                id="rev-date" 
+                required 
+                class="border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="rev-status" value="Approved" checked class="peer sr-only">
+                <div class="py-1 text-center text-xs font-semibold rounded-xl border border-slate-200 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-400 text-slate-600 transition">
+                  &check; Approved
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="rev-status" value="Needs Improvement" class="peer sr-only">
+                <div class="py-1 text-center text-xs font-semibold rounded-xl border border-slate-200 peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-400 text-slate-600 transition">
+                  &excl; Needs Impr.
+                </div>
+              </label>
+            </div>
+            <textarea 
+              id="rev-comment" 
+              required 
+              rows="2" 
+              placeholder="Enter feedback comment..." 
+              class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            ></textarea>
+            <button 
+              type="submit" 
+              class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow transition active:scale-95"
+            >
+              Submit Review
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation Tabs (Overview, Sub-Actions, Reviews) matching Screen 5, 6, 7 -->
+    <nav class="absolute bottom-0 inset-x-0 bg-white border-t border-slate-100 pt-2 pb-2 flex flex-col z-30">
+      <div class="flex items-center justify-around text-xs">
+        <button id="nav-btn-overview" onclick="switchTab('overview')" class="text-xs font-bold text-blue-600 py-1 transition">
+          Overview
+        </button>
+        <button id="nav-btn-subactions" onclick="switchTab('subactions')" class="text-xs font-medium text-slate-500 hover:text-slate-800 py-1 transition">
+          Sub-Actions
+        </button>
+        <button id="nav-btn-reviews" onclick="switchTab('reviews')" class="text-xs font-medium text-slate-500 hover:text-slate-800 py-1 transition">
+          Reviews
+        </button>
+      </div>
+      <div class="w-32 h-1 bg-black rounded-full mx-auto mt-2"></div>
+    </nav>
+
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionId = urlParams.get('id');
+
+    let currentAction = null;
+    let currentSubFilter = 'All';
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      const timeElem = document.getElementById('current-time');
+      if (timeElem) timeElem.textContent = `${hours}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('new-subaction-date').value = todayStr;
+    document.getElementById('rev-date').value = todayStr;
+
+    function switchTab(tab) {
+      const btnOverview = document.getElementById('nav-btn-overview');
+      const btnSubactions = document.getElementById('nav-btn-subactions');
+      const btnReviews = document.getElementById('nav-btn-reviews');
+
+      const panelOverview = document.getElementById('tab-overview');
+      const panelSubactions = document.getElementById('tab-subactions');
+      const panelReviews = document.getElementById('tab-reviews');
+      const headerTitle = document.getElementById('screen-header-title');
+
+      [btnOverview, btnSubactions, btnReviews].forEach(b => {
+        b.className = 'text-xs font-medium text-slate-500 hover:text-slate-800 py-1 transition';
+      });
+      [panelOverview, panelSubactions, panelReviews].forEach(p => p.classList.add('hidden'));
+
+      if (tab === 'subactions') {
+        btnSubactions.className = 'text-xs font-bold text-blue-600 py-1 transition';
+        panelSubactions.classList.remove('hidden');
+        headerTitle.textContent = currentAction ? `SP${currentAction.priority_id}-A${currentAction.id} Sub-actions` : 'Sub-actions';
+      } else if (tab === 'reviews') {
+        btnReviews.className = 'text-xs font-bold text-blue-600 py-1 transition';
+        panelReviews.classList.remove('hidden');
+        headerTitle.textContent = 'Reviews';
+      } else {
+        btnOverview.className = 'text-xs font-bold text-blue-600 py-1 transition';
+        panelOverview.classList.remove('hidden');
+        headerTitle.textContent = 'Actions';
+      }
+    }
+
+    async function loadActionDetail() {
+      if (!actionId) {
+        window.location.href = 'priorities.html';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/actions/${actionId}`);
+        if (!res.ok) throw new Error('Action not found');
+        currentAction = await res.json();
+
+        // Update back link
+        document.getElementById('back-link').href = `priority_detail.html?id=${currentAction.priority_id}`;
+        document.getElementById('priority-link-row').href = `priority_detail.html?id=${currentAction.priority_id}`;
+
+        const codeTag = `SP${currentAction.priority_id}-A${currentAction.id}`;
+        const p = Math.round(currentAction.progress ?? 0);
+
+        // Render Tab 1 (Overview - Screen 5)
+        document.getElementById('action-title').textContent = currentAction.title;
+        document.getElementById('action-desc').textContent = currentAction.description || 'Define clear success criteria for improving company use of github';
+        document.getElementById('overview-progress-text').textContent = `${p}%`;
+        document.getElementById('overview-progress-bar').style.width = `${p}%`;
+        document.getElementById('overview-priority-name').textContent = currentAction.priority_title || 'Priority';
+        document.getElementById('overview-owner').textContent = currentAction.owner;
+        document.getElementById('overview-target-date').textContent = currentAction.target_date;
+        document.getElementById('overview-completion-status').textContent = p >= 100 ? 'Completed' : 'In Progress';
+
+        // Render Tab 2 (Sub-Actions Header - Screen 6)
+        document.getElementById('subaction-header-code').textContent = codeTag;
+        document.getElementById('subaction-header-title').textContent = currentAction.title;
+        document.getElementById('subactions-top-percent').textContent = `${p}%`;
+        document.getElementById('subactions-top-bar').style.width = `${p}%`;
+
+        // Render Tab 3 (Reviews Header - Screen 7)
+        document.getElementById('reviews-header-code').textContent = codeTag;
+        document.getElementById('reviews-header-title').textContent = currentAction.title;
+        document.getElementById('reviews-top-percent').textContent = `${p}%`;
+        document.getElementById('reviews-top-bar').style.width = `${p}%`;
+
+        renderSubActions();
+        renderReviews();
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // ================= SUB-ACTIONS (Screen 6) =================
+    function setSubFilter(filter) {
+      currentSubFilter = filter;
+      const chipAll = document.getElementById('chip-all');
+      const chipComp = document.getElementById('chip-completed');
+      const chipOpen = document.getElementById('chip-open');
+
+      [chipAll, chipComp, chipOpen].forEach(c => {
+        c.className = 'px-3 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition';
+      });
+
+      if (filter === 'Completed') {
+        chipComp.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-sm transition';
+      } else if (filter === 'Open') {
+        chipOpen.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-sm transition';
+      } else {
+        chipAll.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-sm transition';
+      }
+
+      renderSubActions();
+    }
+
+    function renderSubActions() {
+      const container = document.getElementById('subactions-list');
+      const subactions = currentAction ? (currentAction.subactions || []) : [];
+
+      const completedCount = subactions.filter(s => s.completed).length;
+      const openCount = subactions.length - completedCount;
+
+      document.getElementById('chip-count-all').textContent = subactions.length;
+      document.getElementById('chip-count-completed').textContent = completedCount;
+      document.getElementById('chip-count-open').textContent = openCount;
+
+      const filtered = subactions.filter(s => {
+        if (currentSubFilter === 'Completed') return s.completed;
+        if (currentSubFilter === 'Open') return !s.completed;
+        return true;
+      });
+
+      if (subactions.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-400">
+            No sub-actions added yet. Add one below.
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-400">
+            No ${currentSubFilter.toLowerCase()} sub-actions.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const checkIcon = s.completed 
+          ? `<div class="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-sm">
+               <svg class="w-2.5 h-2.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+             </div>`
+          : `<div class="w-4 h-4 rounded-full border border-slate-300 bg-white shrink-0"></div>`;
+
+        return `
+          <div class="bg-white rounded-2xl p-3 border border-slate-100 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] flex items-center justify-between transition">
+            <div class="flex items-center space-x-2.5 flex-1 min-w-0 cursor-pointer" onclick="toggleSubAction(${s.id})">
+              ${checkIcon}
+              <div class="min-w-0 flex-1">
+                <span class="text-xs font-bold text-slate-800 block truncate ${s.completed ? 'line-through text-slate-400 font-normal' : ''}">${s.title}</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Due ${s.due_date}</span>
+              </div>
+            </div>
+            <button onclick="deleteSubAction(${s.id})" class="text-slate-300 hover:text-rose-500 p-1 transition ml-2" title="Delete">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleSubAction(subId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/subactions/${subId}/toggle`, { method: 'PATCH' });
+        if (!res.ok) throw new Error('Toggle failed');
+        await loadActionDetail();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteSubAction(subId) {
+      try {
+        await fetch(`${API_BASE}/api/subactions/${subId}`, { method: 'DELETE' });
+        await loadActionDetail();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('add-subaction-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('new-subaction-title').value.trim();
+      const due_date = document.getElementById('new-subaction-date').value;
+      if (!title || !due_date) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/actions/${actionId}/subactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, due_date })
+        });
+        if (res.ok) {
+          document.getElementById('new-subaction-title').value = '';
+          await loadActionDetail();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    // ================= REVIEWS (Screen 7) =================
+    function getInitials(name) {
+      if (!name) return '??';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function renderReviews() {
+      const container = document.getElementById('reviews-list');
+      const reviews = currentAction ? (currentAction.reviews || []) : [];
+
+      if (reviews.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-400">
+            No formal reviews submitted yet. Add one below.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = reviews.map((r, idx) => {
+        const isApproved = r.status === 'Approved';
+        const badgeColor = isApproved 
+          ? 'text-emerald-600 border-emerald-300' 
+          : 'text-rose-600 border-rose-300';
+        const badgeText = isApproved ? 'Approved ✓' : 'Needs Improvement !';
+        const avatarBg = (idx % 2 === 0) ? 'bg-rose-400' : 'bg-cyan-500';
+
+        return `
+          <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)] space-y-2">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-7 h-7 rounded-full ${avatarBg} text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                (${getInitials(r.reviewer_name)})
+              </div>
+              <span class="text-xs font-bold text-slate-900">${r.reviewer_name}</span>
+            </div>
+
+            <p class="text-xs text-slate-600 font-medium pl-9 leading-snug">
+              ${r.comment}
+            </p>
+
+            <div class="flex items-center justify-between pt-1 text-[10px] pl-9">
+              <span class="text-slate-400">${r.date}</span>
+              <span class="px-2 py-0.5 rounded-full border ${badgeColor} font-semibold">
+                ${badgeText}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('add-review-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const reviewer_name = document.getElementById('rev-name').value.trim();
+      const date = document.getElementById('rev-date').value;
+      const status = document.querySelector('input[name="rev-status"]:checked')?.value || 'Approved';
+      const comment = document.getElementById('rev-comment').value.trim();
+
+      if (!reviewer_name || !date || !comment) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/actions/${actionId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewer_name, date, status, comment })
+        });
+        if (res.ok) {
+          document.getElementById('rev-comment').value = '';
+          await loadActionDetail();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    document.getElementById('delete-action-btn').addEventListener('click', async () => {
+      if (!confirm('Delete this action?')) return;
+      try {
+        await fetch(`${API_BASE}/api/actions/${actionId}`, { method: 'DELETE' });
+        window.location.href = `priority_detail.html?id=${currentAction.priority_id}`;
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadActionDetail);
+  </script>
+</body>
+</html>

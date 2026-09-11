@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Development Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #64748b;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.8s ease-in-out;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
+
+  <!-- Mobile iOS Frame Container -->
+  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+    
+    <!-- iOS Status Bar -->
+    <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
+      <span id="current-time" class="font-bold text-xs tracking-tight">9:41</span>
+      <div class="w-24 h-4 bg-black rounded-full mx-auto shadow-inner"></div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-4h3v13h-3V8zm6-5h3v18h-3V3z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.67 0 7.02 1.41 9.53 3.73L12 19.46 2.47 11.23C4.98 8.91 8.33 7.5 12 7.5z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-900 rounded-sm p-0.5 flex items-center">
+          <div class="h-full w-3.5 bg-slate-900 rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen Header (Hamburger, Development Plan, Bell) -->
+    <header class="px-5 pt-3 pb-3 flex items-center justify-between shrink-0">
+      <button class="text-slate-800 hover:text-slate-600 transition p-1">
+        <svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+      <h1 class="text-sm font-bold text-slate-800 tracking-tight">Development Plan</h1>
+      <button class="text-slate-800 hover:text-slate-600 transition p-1 relative">
+        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+        </svg>
+        <span class="w-2 h-2 rounded-full bg-slate-900 absolute top-1 right-1"></span>
+      </button>
+    </header>
+
+    <!-- Scrollable Main Content -->
+    <main class="flex-1 overflow-y-auto px-5 pt-2 pb-24 space-y-4">
+      
+      <!-- Title & Subtitle -->
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">Dashboard</h2>
+        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Overview of progress against the strategic plan</p>
+      </div>
+
+      <!-- Overall Progress Card -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold text-slate-800 block">Overall Progress</span>
+          <span id="overall-percentage" class="text-3xl font-extrabold text-slate-900 tracking-tight block my-0.5">0%</span>
+          <span id="progress-indicator-pill" class="text-[11px] font-semibold text-emerald-600 inline-block">+0% live rollup</span>
+        </div>
+
+        <!-- Radial Progress Indicator -->
+        <div class="relative w-16 h-16 flex items-center justify-center shrink-0">
+          <svg class="w-full h-full" viewBox="0 0 64 64">
+            <circle
+              cx="32"
+              cy="32"
+              r="26"
+              fill="transparent"
+              stroke="#f1f5f9"
+              stroke-width="5.5"
+            />
+            <circle
+              id="progress-ring-circle"
+              class="progress-ring__circle"
+              cx="32"
+              cy="32"
+              r="26"
+              fill="transparent"
+              stroke="#22c55e"
+              stroke-width="5.5"
+              stroke-linecap="round"
+              stroke-dasharray="163.36"
+              stroke-dashoffset="163.36"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <!-- 6 Metrics Cards Grid (2 Columns x 3 Rows) -->
+      <div class="grid grid-cols-2 gap-3">
+        
+        <!-- Card 1: Priorities -->
+        <a href="priorities.html" class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] hover:shadow-md transition active:scale-[0.98] block">
+          <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-1">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <div id="stat-priorities" class="text-2xl font-extrabold text-slate-900 leading-none">0</div>
+          <span class="text-xs text-slate-500 font-medium mt-1 block">Priorities</span>
+        </a>
+
+        <!-- Card 2: On Track -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]">
+          <div class="w-7 h-7 flex items-center mb-1">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+          </div>
+          <div id="stat-on-track" class="text-2xl font-extrabold text-slate-900 leading-none">0</div>
+          <span class="text-xs text-slate-500 font-medium mt-1 block">On Track</span>
+        </div>
+
+        <!-- Card 3: Actions -->
+        <a href="priorities.html?view=actions" class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] hover:shadow-md transition active:scale-[0.98] block">
+          <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-1">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <div id="stat-actions" class="text-2xl font-extrabold text-slate-900 leading-none">0</div>
+          <span class="text-xs text-slate-500 font-medium mt-1 block">Actions</span>
+        </a>
+
+        <!-- Card 4: At Risk -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]">
+          <div class="w-7 h-7 flex items-center mb-1">
+            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+          </div>
+          <div id="stat-at-risk" class="text-2xl font-extrabold text-slate-900 leading-none">0</div>
+          <span class="text-xs text-slate-500 font-medium mt-1 block">At Risk</span>
+        </div>
+
+        <!-- Card 5: Completed -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]">
+          <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center mb-1">
+            <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          </div>
+          <div id="stat-completed" class="text-2xl font-extrabold text-slate-900 leading-none">0</div>
+          <span class="text-xs text-slate-500 font-medium mt-1 block">Completed</span>
+        </div>
+
+        <!-- Card 6: Off Track -->
+        <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]">
+          <div class="w-7 h-7 flex items-center mb-1">
+            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+          </div>
+          <div id="stat-off-track" class="text-2xl font-extrabold text-slate-900 leading-none">0</div>
+          <span class="text-xs text-slate-500 font-medium mt-1 block">Off Track</span>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Mockup Style: Dashboard, Priorities, Actions) -->
+    <nav class="absolute bottom-0 inset-x-0 bg-white border-t border-slate-100 pt-2.5 pb-2 flex flex-col z-30">
+      <div class="flex items-center justify-around text-xs">
+        <a href="index.html" class="font-bold text-blue-600 text-xs py-1 transition">Dashboard</a>
+        <a href="priorities.html" class="font-medium text-slate-600 hover:text-slate-900 text-xs py-1 transition">Priorities</a>
+        <a href="priorities.html?view=actions" class="font-medium text-slate-600 hover:text-slate-900 text-xs py-1 transition">Actions</a>
+      </div>
+      <!-- Home Indicator bar -->
+      <div class="w-32 h-1 bg-black rounded-full mx-auto mt-2"></div>
+    </nav>
+
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      const timeElem = document.getElementById('current-time');
+      if (timeElem) timeElem.textContent = `${hours}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function setProgressRing(percent) {
+      const circle = document.getElementById('progress-ring-circle');
+      const circumference = 2 * Math.PI * 26; // ~163.36
+      circle.style.strokeDasharray = `${circumference} ${circumference}`;
+      const offset = circumference - (percent / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      document.getElementById('overall-percentage').textContent = `${Math.round(percent)}%`;
+      
+      const pill = document.getElementById('progress-indicator-pill');
+      if (percent > 0) {
+        pill.textContent = `+${Math.round(percent)}% this cycle`;
+        pill.className = 'text-[11px] font-semibold text-emerald-600 inline-block';
+      } else {
+        pill.textContent = '0% live rollup';
+        pill.className = 'text-[11px] font-semibold text-slate-400 inline-block';
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        const statsRes = await fetch(`${API_BASE}/api/dashboard/stats`);
+        if (!statsRes.ok) throw new Error(`HTTP error! status: ${statsRes.status}`);
+        const stats = await statsRes.json();
+
+        setProgressRing(stats.overall_progress ?? 0.0);
+
+        document.getElementById('stat-priorities').textContent = stats.priorities_count ?? 0;
+        document.getElementById('stat-on-track').textContent = stats.on_track_count ?? 0;
+        document.getElementById('stat-actions').textContent = stats.actions_count ?? 0;
+        document.getElementById('stat-at-risk').textContent = stats.at_risk_count ?? 0;
+        document.getElementById('stat-completed').textContent = stats.completed_count ?? 0;
+        document.getElementById('stat-off-track').textContent = stats.off_track_count ?? 0;
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Priority - Development Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #64748b; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased text-slate-800">
+
+  <!-- Mobile iOS Frame Container -->
+  <div class="w-full max-w-sm bg-white sm:rounded-[44px] sm:shadow-2xl sm:border-[7px] sm:border-slate-900 overflow-hidden flex flex-col min-h-screen sm:min-h-[790px] sm:max-h-[820px] relative">
+    
+    <!-- iOS Status Bar -->
+    <div class="pt-3 px-6 pb-1 flex items-center justify-between text-xs text-slate-900 select-none z-20 shrink-0">
+      <span id="current-time" class="font-bold text-xs tracking-tight">9:41</span>
+      <div class="w-24 h-4 bg-black rounded-full mx-auto shadow-inner"></div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-4h3v13h-3V8zm6-5h3v18h-3V3z"/></svg>
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.67 0 7.02 1.41 9.53 3.73L12 19.46 2.47 11.23C4.98 8.91 8.33 7.5 12 7.5z"/></svg>
+        <div class="w-5 h-2.5 border border-slate-900 rounded-sm p-0.5 flex items-center">
+          <div class="h-full w-3.5 bg-slate-900 rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header (< Create Priority) matching Screen 8 -->
+    <header class="px-5 pt-3 pb-2 flex items-center justify-between shrink-0">
+      <a href="priorities.html" class="text-slate-800 hover:text-slate-600 p-1">
+        <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+      </a>
+      <h1 class="text-sm font-bold text-slate-800 tracking-tight">Create Priority</h1>
+      <div class="w-4 h-4"></div>
+    </header>
+
+    <!-- Form Content matching Screen 8 -->
+    <main class="flex-1 overflow-y-auto px-5 py-3 pb-20">
+      <form id="priority-form" class="space-y-4">
+        
+        <!-- White Form Card matching mockup -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] space-y-3.5">
+          
+          <!-- Priority title -->
+          <div>
+            <label for="title" class="block text-xs font-bold text-slate-800 mb-1.5">Priority title</label>
+            <input 
+              type="text" 
+              id="title" 
+              name="title" 
+              required
+              placeholder="Enter title" 
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            >
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-xs font-bold text-slate-800 mb-1.5">Description</label>
+            <textarea 
+              id="description" 
+              name="description" 
+              rows="3" 
+              placeholder="Enter description" 
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Owner -->
+          <div>
+            <label for="owner" class="block text-xs font-bold text-slate-800 mb-1.5">Owner</label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="owner" 
+                name="owner" 
+                required
+                list="owner-options"
+                placeholder="Select owner" 
+                class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition pr-8"
+              >
+              <datalist id="owner-options">
+                <option value="Jack Pollard">
+                <option value="Sarah Jenkins">
+                <option value="Darren Abraham">
+                <option value="Liam Reynolds">
+                <option value="Alex Rivera">
+              </datalist>
+              <div class="absolute inset-y-0 right-0 flex items-center px-2.5 pointer-events-none text-slate-400">
+                <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target Date -->
+          <div>
+            <label for="target_date" class="block text-xs font-bold text-slate-800 mb-1.5">Target Date</label>
+            <div class="relative">
+              <input 
+                type="date" 
+                id="target_date" 
+                name="target_date" 
+                required
+                class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              >
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Create Button matching Screen 8 (Blue button centered) -->
+        <div class="pt-2 text-center">
+          <button 
+            type="submit" 
+            id="submit-btn" 
+            class="px-10 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-md transition active:scale-95 inline-block"
+          >
+            Create
+          </button>
+        </div>
+
+      </form>
+    </main>
+
+    <!-- Home Indicator -->
+    <div class="w-32 h-1 bg-black rounded-full mx-auto mb-2"></div>
+
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      const timeElem = document.getElementById('current-time');
+      if (timeElem) timeElem.textContent = `${hours}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Default target date to 30 days ahead
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    document.getElementById('target_date').value = d.toISOString().split('T')[0];
+
+    document.getElementById('priority-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const owner = document.getElementById('owner').value.trim();
+      const target_date = document.getElementById('target_date').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/priorities`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description, owner, target_date, status: 'On Track' })
+        });
+        if (!res.ok) throw new Error('Create priority failed');
+        window.location.href = 'priorities.html';
+      } catch (err) {
+        alert(err.message || 'Error creating priority');
+        btn.disabled = false;
+        btn.textContent = 'Create';
+      }
+    });
+  </script>
+</body>
+</html>
